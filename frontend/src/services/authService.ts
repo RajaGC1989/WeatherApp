@@ -1,6 +1,6 @@
 export async function register(Username: string, Password: string) {
   try {
-    const response = await fetch("https://localhost:7103/auth/register", {
+    const response = await fetch("https://localhost:7103/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export async function register(Username: string, Password: string) {
 
 export async function login(Username: string, Password: string) {
   try {
-    const response = await fetch("https://localhost:7103/auth/login", {
+    const response = await fetch("https://localhost:7103/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -73,7 +73,7 @@ namespace WeatherApp.Infrastructure.Repositories
 
             if(weatherByCity != null)
             {
-                _context.Weathers.Update(weatherByCity.Result);
+                _context.Weathers.Update(weather);
                 await _context.SaveChangesAsync();
             }
             
