@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using WeatherApp.Application.CQRS.Commands;
 using WeatherApp.Application.CQRS.Queries;
+using WeatherApp.Application.Interfaces;
 using WeatherApp.Application.Services;
 using WeatherApp.Domain.Models;
 
@@ -15,12 +16,17 @@ namespace WeatherApp.API.Controllers
     public class WeatherController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly WeatherService _weatherService;
+        private readonly IWeatherService _weatherService;
 
         public WeatherController(IMediator mediator, WeatherService weatherService)
         {
             _mediator = mediator;
             _weatherService = weatherService;
+        }
+
+        public WeatherController()
+        {
+            
         }
 
         [HttpGet]

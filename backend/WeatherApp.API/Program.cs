@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using WeatherApp.Application.CQRS.Commands;
 using WeatherApp.Application.CQRS.Queries;
+using WeatherApp.Application.Interfaces;
 using WeatherApp.Application.Services;
 using WeatherApp.Domain.Interfaces;
 using WeatherApp.Infrastructure.Persistance;
@@ -63,7 +64,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Creat
 builder.Services.AddHttpClient();
 
 builder.Services.Configure<WeatherApiSettings>(builder.Configuration.GetSection("WeatherApi"));
-builder.Services.AddScoped<WeatherService>();
+builder.Services.AddScoped<IWeatherService, WeatherService>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
