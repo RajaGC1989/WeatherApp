@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace WeatherApp.IntegrationTests
 {  

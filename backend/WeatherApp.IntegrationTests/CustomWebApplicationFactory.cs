@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 using WeatherApp.Infrastructure.Persistance;
 
 namespace WeatherApp.IntegrationTests
