@@ -57,6 +57,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 { options.UseSqlite("Data Source=weather.db"); });
 
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllWeatherQuery).Assembly));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateWeatherCommand).Assembly));

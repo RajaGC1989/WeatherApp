@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using WeatherApp.API.DTO;
-using WeatherApp.Domain.Models;
+using WeatherApp.Application.Services;
+using WeatherApp.Domain.DTO;
 using WeatherApp.Infrastructure.Persistance;
 
 namespace WeatherApp.API.Controllers
@@ -15,60 +9,42 @@ namespace WeatherApp.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _config;
-        private readonly AppDbContext _appDbContext;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration config, AppDbContext appDbContext)
+        public AuthController(IConfiguration config, AppDbContext appDbContext, IAuthService authService)
         {
-            _config = config;
-            _appDbContext = appDbContext;
+            _authService = authService;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserLoginDto newUser)
         {
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
-
-            var user = new User
+            if (newUser == null)
             {
-                Username = newUser.Username,
-                PasswordHash = hashedPassword
-            };
+                return BadRequest("Invalid user data");
+            }
 
-            _appDbContext.Users.Add(user);
-            await _appDbContext.SaveChangesAsync();
+            var result = await _authService.RegisterUser(newUser);
 
-            return Created($"/api/users/{user.Username}", user);
+            if (!result)
+            {
+                return BadRequest("User already exists");
+            }
+
+            return Created($"/api/users/{newUser.Username}", newUser);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto login)
         {
-            var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Username == login.Username);
-
-            if (user != null || BCrypt.Net.BCrypt.Verify(login.Password, user.PasswordHash))
+            if (login == null)
             {
-                var token = GenerateJwtToken(user.Username);
-                return Ok(new { token });
+                return BadRequest("Invalid login data");
             }
 
-            return Unauthorized("Invalid credentials");
-        }
+            var token = await _authService.AuthenticateUser(login);
 
-        private string GenerateJwtToken(string username)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_config.GetValue<string>("SecretKey"));
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, username) }),
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return token != null ? Ok(new { token }) : Unauthorized("Invalid credentials");
         }
     }
 }

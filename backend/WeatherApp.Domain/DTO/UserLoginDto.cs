@@ -1,4 +1,4 @@
-﻿namespace WeatherApp.API.DTO
+﻿namespace WeatherApp.Domain.DTO
 {
     public class UserLoginDto
     {

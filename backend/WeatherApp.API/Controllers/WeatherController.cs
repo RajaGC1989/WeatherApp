@@ -18,7 +18,7 @@ namespace WeatherApp.API.Controllers
         private readonly IMediator _mediator;
         private readonly IWeatherService _weatherService;
 
-        public WeatherController(IMediator mediator, WeatherService weatherService)
+        public WeatherController(IMediator mediator, IWeatherService weatherService)
         {
             _mediator = mediator;
             _weatherService = weatherService;
