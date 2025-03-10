@@ -33,16 +33,13 @@ namespace WeatherApp.Infrastructure.Repositories
             }
             catch (DbUpdateException dbEx)
             {
-                // Log database update exceptions
-                // Log(dbEx);
-                //throw new Exception("An error occurred while updating the database.", dbEx);
+                // Todo: Log database update exceptions
                 return null;
             }
             catch (Exception ex)
             {
                 // Log general exceptions
                 // Log(ex);
-                //throw new Exception("An error occurred while adding weather data.", ex);
                 return null;
             }
         }
@@ -69,11 +66,11 @@ namespace WeatherApp.Infrastructure.Repositories
 
         public async Task<Weather> UpdateWeatherAsync(Weather weather)
         {
-            var weatherByCity = GetWeatherByCityAsync(weather.CityName);
+            var weatherByCity = await GetWeatherByCityAsync(weather.CityName);
 
             if(weatherByCity != null)
             {
-                _context.Weathers.Update(weather);
+                _context.Attach(weather);
                 await _context.SaveChangesAsync();
             }
             

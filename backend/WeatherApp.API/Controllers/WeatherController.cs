@@ -24,11 +24,6 @@ namespace WeatherApp.API.Controllers
             _weatherService = weatherService;
         }
 
-        public WeatherController()
-        {
-            
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetAllWeather()
         {
