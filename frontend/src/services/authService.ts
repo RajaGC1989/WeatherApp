@@ -1,6 +1,7 @@
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 export async function register(Username: string, Password: string) {
   try {
-    const response = await fetch("https://localhost:7103/api/auth/register", {
+    const response = await fetch(`${apiBaseUrl}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +20,7 @@ export async function register(Username: string, Password: string) {
 
 export async function login(Username: string, Password: string) {
   try {
-    const response = await fetch("https://localhost:7103/api/auth/login", {
+    const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -33,6 +34,7 @@ export async function login(Username: string, Password: string) {
     localStorage.setItem("token", data.token);
     return true;
   } catch (error) {
+    alert("Invalid username or password");
     console.error("Error logging in:", error);
     return false;
   }

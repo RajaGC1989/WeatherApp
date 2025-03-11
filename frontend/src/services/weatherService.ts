@@ -1,18 +1,16 @@
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 export async function fetchWeather(city: string) {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
       throw new Error("No token found");
     }
-    const response = await fetch(
-      ` https://localhost:7103/api/weather/${city}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        method: "GET",
-      }
-    );
+    const response = await fetch(` ${apiBaseUrl}/api/weather/${city}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: "GET",
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch weather data");
     }
@@ -29,15 +27,12 @@ export async function UpdateWeather(city: string) {
     if (!token) {
       throw new Error("No token found");
     }
-    const response = await fetch(
-      ` https://localhost:7103/api/weather/${city}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        method: "PUT",
-      }
-    );
+    const response = await fetch(` ${apiBaseUrl}/api/weather/${city}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: "PUT",
+    });
     if (!response.ok) {
       throw new Error("Failed to update weather data");
     }
@@ -54,7 +49,7 @@ export async function deleteWeather(city: string) {
     if (!token) {
       throw new Error("No token found");
     }
-    const response = await fetch(`https://localhost:7103/api/weather/${city}`, {
+    const response = await fetch(`${apiBaseUrl}/api/weather/${city}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -76,7 +71,7 @@ export async function fetchAllWeather() {
     if (!token) {
       throw new Error("No token found");
     }
-    const response = await fetch("https://localhost:7103/api/weather", {
+    const response = await fetch(`${apiBaseUrl}/api/weather`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -98,16 +93,13 @@ export async function addWeather(city: string) {
     if (!token) {
       throw new Error("No token found");
     }
-    const response = await fetch(
-      `https://localhost:7103/api/weather/fetch/${city}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(`${apiBaseUrl}/api/weather/fetch/${city}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
     if (!response.ok) {
       throw new Error("Failed to add weather data");
     }
