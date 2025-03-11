@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -71,7 +71,7 @@ export default function WeatherDashboard() {
   };
 
   const handleUpdateWeather = async (city: string) => {
-    const weatherData = await UpdateWeather(city);
+    await UpdateWeather(city);
   };
 
   const handleAddWeather = async (): Promise<void> => {
