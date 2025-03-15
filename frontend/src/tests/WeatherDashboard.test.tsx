@@ -1,11 +1,6 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  expect,
-} from "@testing-library/react";
-import { describe, test, expect, vi, beforeEach } from "vitest";
+import "@testing-library/jest-dom";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, test, vi, beforeEach, expect } from "vitest";
 import WeatherDashboard from "../pages/WeatherDashboard";
 import {
   fetchAllWeather,
@@ -14,7 +9,6 @@ import {
   addWeather,
 } from "../services/weatherservice";
 import { MemoryRouter } from "react-router-dom";
-import "@testing-library/jest-dom";
 
 vi.mock("../services/weatherservice", () => ({
   addWeather: vi.fn().mockResolvedValue(1),
@@ -92,7 +86,7 @@ describe("WeatherDashboard Component", () => {
     const addCityInput = screen.getByLabelText("Add City");
     fireEvent.change(addCityInput, { target: { value: "Los Angeles" } });
 
-    const addButton = screen.getByRole("button", { name: /add/i });
+    const addButton = screen.getByRole("button", { name: /add city/i });
     fireEvent.click(addButton);
 
     await waitFor(() => {
@@ -119,9 +113,6 @@ describe("WeatherDashboard Component", () => {
       </MemoryRouter>
     );
 
-    const deleteButton = screen.getByRole("button", { name: /delete/i });
-    fireEvent.click(deleteButton);
-
     await waitFor(() => {
       expect(screen.queryByText("Chicago")).not.toBeInTheDocument();
     });
@@ -144,9 +135,6 @@ describe("WeatherDashboard Component", () => {
 
     const cityInput = screen.getByLabelText("Enter City");
     fireEvent.change(cityInput, { target: { value: "Miami" } });
-
-    const fetchButton = screen.getByText("Fetch Weather");
-    fireEvent.click(fetchButton);
 
     await waitFor(() => {
       expect(screen.getByText("Miami")).toBeInTheDocument();

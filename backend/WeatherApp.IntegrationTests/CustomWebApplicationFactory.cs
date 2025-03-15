@@ -13,7 +13,10 @@ namespace WeatherApp.IntegrationTests
         {
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                // Remove the real database registration
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+
                 if (descriptor != null)
                 {
                     services.Remove(descriptor);
@@ -21,14 +24,15 @@ namespace WeatherApp.IntegrationTests
 
                 services.AddDbContext<AppDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase("TestDb");
+                    options.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
 
                 var sp = services.BuildServiceProvider();
                 using (var scope = sp.CreateScope())
-                using (var context = scope.ServiceProvider.GetRequiredService<AppDbContext>())
                 {
-                    context.Database.EnsureCreated();
+                    var scopedServices = scope.ServiceProvider;
+                    var db = scopedServices.GetRequiredService<AppDbContext>();
+                    db.Database.EnsureCreated();
                 }
             });
         }

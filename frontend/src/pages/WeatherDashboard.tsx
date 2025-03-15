@@ -127,6 +127,7 @@ export default function WeatherDashboard() {
             variant="contained"
             color="primary"
             size="small"
+            aria-label="add city"
             startIcon={<Add />}
             sx={{
               height: "40px",
@@ -195,6 +196,7 @@ export default function WeatherDashboard() {
                     </TableCell>
                     <TableCell>
                       <IconButton
+                        data-testid="delete-city"
                         onClick={() => handleDeleteWeather(weather.cityName)}
                         color="error"
                       >
