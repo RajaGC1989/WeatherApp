@@ -64,7 +64,7 @@ This is a full-stack weather application built using **C# (.NET Core) for the ba
    ```sh
    dotnet run
    ```
-6. **Access API Swagger Docs** at [http://localhost:7103/swagger](http://localhost:7103/swagger)
+6. **Access API Swagger Docs** at [https://localhost:7103/swagger/index.html](https://localhost:7103/swagger/index.html)
 
 ### Frontend Setup
 
@@ -100,9 +100,7 @@ dotnet test --filter Category=Integration
 
 ### Frontend Tests (If Implemented)
 
-- need to Implement
-
----
+- npm test
 
 ## API Endpoints
 
@@ -149,8 +147,8 @@ dotnet test --filter Category=Integration
 - Implement Infinite Scrolling in Grid** (MUI DataGrid) **
 - Implement **Caching** (e.g., Redis) to reduce API calls
 - Add **Role-based Authentication** (Admin/User)
-- Implement **WebSockets** for real-time weather updates
 - Improve **UI/UX** with better visualization
+- Azure deployment
 
 ---
 

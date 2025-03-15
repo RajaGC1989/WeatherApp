@@ -43,8 +43,6 @@ builder.Services.AddHttpClient();
 builder.Services.Configure<WeatherApiSettings>(builder.Configuration.GetSection("WeatherApi"));
 builder.Services.AddScoped<IWeatherService, WeatherService>();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var secreyKey = builder.Configuration.GetValue<string>("SecretKey");
@@ -89,6 +87,7 @@ void EnableSwagger(WebApplicationBuilder builder)
     {
         options.SwaggerDoc("v1", new OpenApiInfo { Title = "Weather API", Version = "v1" });
 
+        // Enable JWT Authentication in Swagger
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             Name = "Authorization",
