@@ -71,7 +71,12 @@ export default function WeatherDashboard() {
   };
 
   const handleUpdateWeather = async (city: string) => {
-    await UpdateWeather(city);
+    const success = await UpdateWeather(city);
+    if (success) {
+      fetchAllWeather().then((data) => {
+        setWeatherList(data);
+      });
+    }
   };
 
   const handleAddWeather = async (): Promise<void> => {
@@ -79,8 +84,9 @@ export default function WeatherDashboard() {
     if (isSuccess) {
       fetchAllWeather().then((data) => {
         setWeatherList(data);
-        alert("City added successfully");
       });
+
+      alert("City added successfully");
     }
   };
 
@@ -158,14 +164,6 @@ export default function WeatherDashboard() {
           value={city}
           onChange={(e) => setCity(e.target.value)}
         />
-        <Button
-          fullWidth
-          variant="contained"
-          sx={{ mt: 2 }}
-          onClick={handleFetchWeather}
-        >
-          Fetch Weather
-        </Button>
 
         {weatherList.length > 0 && (
           <TableContainer component={Paper} sx={{ mt: 3 }}>

@@ -1,11 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using WeatherApp.Application.CQRS.Commands;
 using WeatherApp.Application.CQRS.Queries;
+using WeatherApp.Application.DTO;
 using WeatherApp.Application.Interfaces;
-using WeatherApp.Application.Services;
 using WeatherApp.Domain.Models;
 
 namespace WeatherApp.API.Controllers
@@ -27,55 +27,169 @@ namespace WeatherApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllWeather()
         {
-            var result = await _mediator.Send(new GetAllWeatherQuery());
-            return Ok(result);
+            try
+            {
+                var result = await _mediator.Send(new GetAllWeatherQuery());
+                return Ok(new ApiResponse<IEnumerable<Weather>>
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Message = "Weather data retrieved successfully.",
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = $"Error retrieving weather data: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpGet("{city}")]
         public async Task<IActionResult> GetWeatherByCity(string city)
         {
-            var result = await _mediator.Send(new GetWeatherByCity(city));
-            if (result == null)
-                return NotFound("Please add the city");
+            try
+            {
+                var result = await _mediator.Send(new GetWeatherByCity(city));
 
-            return Ok(result);
+                if (result == null)
+                    return NotFound(new ApiResponse<string>
+                    {
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = "City not found.",
+                        Data = null
+                    });
+
+                return Ok(new ApiResponse<Weather>
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Message = "Weather data retrieved successfully.",
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = $"Error retrieving weather data: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpGet("fetch/{city}")]
         public async Task<IActionResult> FetchWeatherFromAPI(string city)
         {
-            var weather = await _weatherService.GetWeatherForecastAsync(city);
-            if (weather == null)
-                return NotFound();
+            try
+            {
+                var weatherResponse = await _weatherService.GetWeatherForecastAsync(city);
 
-            await _mediator.Send(new CreateWeatherCommand(weather));
-            return Ok(weather);
+                if (weatherResponse == null || weatherResponse.Data == null)
+                    return NotFound(new ApiResponse<string>
+                    {
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = "Weather data not found from external API.",
+                        Data = null
+                    });
+
+                await _mediator.Send(new CreateWeatherCommand(weatherResponse.Data));
+
+                return Ok(new ApiResponse<Weather>
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Message = "Weather data fetched and saved successfully.",
+                    Data = weatherResponse.Data
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = $"Error fetching weather data: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpDelete("{city}")]
         public async Task<IActionResult> DeleteWeather(string city)
         {
-            var success = await _mediator.Send(new DeleteWeatherCommand(city));
-            if (!success)
-                return NotFound("City not found");
+            try
+            {
+                var success = await _mediator.Send(new DeleteWeatherCommand(city));
 
-            return NoContent();
+                if (!success)
+                    return NotFound(new ApiResponse<string>
+                    {
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = "City not found.",
+                        Data = null
+                    });
+
+                return Ok(new ApiResponse<string>
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Message = "Weather data deleted successfully.",
+                    Data = null
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = $"Error deleting weather data: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpPut("{city}")]
         public async Task<IActionResult> UpdateWeather(string city)
         {
-            var weather = await _weatherService.GetWeatherForecastAsync(city);
+            try
+            {
+                var weatherResponse = await _weatherService.GetWeatherForecastAsync(city);
 
-            if (weather == null)
-                return NotFound("City not found!");
+                if (weatherResponse == null || weatherResponse.Data == null)
+                    return NotFound(new ApiResponse<string>
+                    {
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = "City not found in external API.",
+                        Data = null
+                    });
 
-            var updatedWeather = await _mediator.Send(new UpdateWeatherCommand(weather));
+                var updatedWeather = await _mediator.Send(new UpdateWeatherCommand(weatherResponse.Data));
 
-            if (updatedWeather == null)
-                return NotFound("City not found");
+                if (updatedWeather == null)
+                    return NotFound(new ApiResponse<string>
+                    {
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = "Failed to update city weather.",
+                        Data = null
+                    });
 
-            return Ok(updatedWeather);
+                return Ok(new ApiResponse<Weather>
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Message = "Weather data updated successfully.",
+                    Data = updatedWeather
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = $"Error updating weather data: {ex.Message}",
+                    Data = null
+                });
+            }
         }
     }
 }

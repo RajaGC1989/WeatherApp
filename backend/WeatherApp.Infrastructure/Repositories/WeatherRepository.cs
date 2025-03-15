@@ -18,9 +18,9 @@ namespace WeatherApp.Infrastructure.Repositories
         {
             try
             {
-                var weatherByCity = GetWeatherByCityAsync(weather.CityName);
+                var weatherByCity = await GetWeatherByCityAsync(weather.CityName);
 
-                if (weatherByCity.Result != null)
+                if (weatherByCity != null)
                 {
                     return await UpdateWeatherAsync(weather);
                 }
@@ -66,15 +66,26 @@ namespace WeatherApp.Infrastructure.Repositories
 
         public async Task<Weather> UpdateWeatherAsync(Weather weather)
         {
-            var weatherByCity = await GetWeatherByCityAsync(weather.CityName);
+            var existingWeather = await GetWeatherByCityAsync(weather.CityName);
 
-            if(weatherByCity != null)
+            if (existingWeather != null)
             {
-                _context.Attach(weather);
+                var trackedEntity = _context.ChangeTracker.Entries<Weather>()
+                                            .FirstOrDefault(e => e.Entity.Id == existingWeather.Id);
+                if (trackedEntity != null)
+                {
+                    _context.Entry(trackedEntity.Entity).State = EntityState.Detached;
+                }
+
+                weather.Id = existingWeather.Id;
+                _context.Weathers.Attach(weather);
+                _context.Entry(weather).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
+                return weather;
             }
-            
-            return await GetWeatherByCityAsync(weather.CityName);
+
+            return null;
         }
 
     }

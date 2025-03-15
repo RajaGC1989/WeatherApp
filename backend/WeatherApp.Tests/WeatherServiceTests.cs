@@ -60,9 +60,9 @@ namespace WeatherApp.UnitTests
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("London", result.CityName);
-            Assert.Equal(15.5m, result.Temperature);
-            Assert.Equal("Clear", result.WeatherCondition);
+            Assert.Equal("London", result.Data.CityName);
+            Assert.Equal(15.5m, result.Data.Temperature);
+            Assert.Equal("Clear", result.Data.WeatherCondition);
         }
 
         [Fact]
@@ -85,25 +85,34 @@ namespace WeatherApp.UnitTests
 
             var result = await _weatherService.GetWeatherForecastAsync(city);
 
-            Assert.Null(result);
+            Assert.Null(result.Data);
         }
 
         [Fact]
-        public async Task GetWeatherForecastAsync_ThrowsException_WhenApiResponseIsUnsuccessful()
+        public async Task GetWeatherForecastAsync_ReturnsErrorResponse_WhenApiResponseIsUnsuccessful()
         {
             var city = "London";
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = new StringContent("Bad Request")
+            };
 
             _httpMessageHandlerMock
-             .Protected()
-             .Setup<Task<HttpResponseMessage>>(
-                 "SendAsync",
-                 ItExpr.IsAny<HttpRequestMessage>(),
-                 ItExpr.IsAny<CancellationToken>()
-             )
-             .ReturnsAsync(responseMessage);
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(responseMessage);
 
-            await Assert.ThrowsAsync<HttpRequestException>(() => _weatherService.GetWeatherForecastAsync(city));
+            var result = await _weatherService.GetWeatherForecastAsync(city);
+
+            Assert.NotNull(result);
+            Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.Equal("Failed to fetch weather data. Status: BadRequest", result.Message);
+            Assert.Null(result.Data);
         }
+
     }
 }

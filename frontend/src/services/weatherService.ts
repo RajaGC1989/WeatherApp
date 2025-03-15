@@ -11,10 +11,13 @@ export async function fetchWeather(city: string) {
       },
       method: "GET",
     });
+    const result = await response.json();
+
     if (!response.ok) {
-      throw new Error("Failed to fetch weather data");
+      throw new Error(result.message || "Failed to fetch weather data");
     }
-    return await response.json();
+
+    return result.data;
   } catch (error) {
     console.error("Error fetching weather:", error);
     return null;
@@ -77,10 +80,13 @@ export async function fetchAllWeather() {
       },
       method: "GET",
     });
+    const result = await response.json();
+
     if (!response.ok) {
-      throw new Error("Failed to fetch weather data");
+      throw new Error(result.message || "Failed to fetch weather data");
     }
-    return await response.json();
+
+    return result.data;
   } catch (error) {
     console.error("Error fetching weather:", error);
     return null;
@@ -93,6 +99,7 @@ export async function addWeather(city: string) {
     if (!token) {
       throw new Error("No token found");
     }
+
     const response = await fetch(`${apiBaseUrl}/api/weather/fetch/${city}`, {
       method: "GET",
       headers: {
@@ -100,10 +107,18 @@ export async function addWeather(city: string) {
         "Content-Type": "application/json",
       },
     });
-    if (!response.ok) {
-      throw new Error("Failed to add weather data");
+
+    if (response.status === 404) {
+      alert("City not found");
+      throw new Error("City not found");
     }
-    return response.status;
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.message || "Failed to add weather data");
+    }
+
+    return true;
   } catch (error) {
     console.error("Error adding weather:", error);
     return false;

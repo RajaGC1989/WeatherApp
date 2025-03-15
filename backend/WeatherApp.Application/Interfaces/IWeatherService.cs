@@ -1,9 +1,10 @@
-﻿using WeatherApp.Domain.Models;
+﻿using WeatherApp.Application.DTO;
+using WeatherApp.Domain.Models;
 
 namespace WeatherApp.Application.Interfaces
 {
     public interface IWeatherService
     {
-        Task<Weather> GetWeatherForecastAsync(string city);
+        Task<ApiResponse<Weather>> GetWeatherForecastAsync(string city);
     }
 }
