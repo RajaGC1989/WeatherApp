@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -13,41 +13,41 @@ using WeatherApp.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var secretKey = builder.Configuration.GetValue<string>("SecretKey") ?? throw new InvalidOperationException("SecretKey is missing!");
+var frontendUrl = builder.Configuration.GetValue<string>("ReactAppUrl") ?? "http://localhost:5173";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins(builder.Configuration.GetValue<string>("ReactAppUrl"))
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(frontendUrl)
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
 builder.Services.AddControllers();
-
 EnableSwagger(builder);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-{ options.UseSqlite("Data Source=weather.db"); });
+{
+    options.UseSqlite("Data Source=weather.db");
+});
 
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllWeatherQuery).Assembly));
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateWeatherCommand).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
+    typeof(GetAllWeatherQuery).Assembly,
+    typeof(CreateWeatherCommand).Assembly
+));
 
 builder.Services.AddHttpClient();
-
 builder.Services.Configure<WeatherApiSettings>(builder.Configuration.GetSection("WeatherApi"));
 builder.Services.AddScoped<IWeatherService, WeatherService>();
 
-builder.Services.AddOpenApi();
-
-var secreyKey = builder.Configuration.GetValue<string>("SecretKey");
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secreyKey));
-
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -59,26 +59,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateAudience = false
     };
 });
-
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Weather API v1"));
 }
 
 app.UseCors("AllowFrontend");
-
 app.UseHttpsRedirection();
-
-app.MapControllers();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapControllers();
 await app.RunAsync();
 
 void EnableSwagger(WebApplicationBuilder builder)
@@ -87,7 +82,6 @@ void EnableSwagger(WebApplicationBuilder builder)
     {
         options.SwaggerDoc("v1", new OpenApiInfo { Title = "Weather API", Version = "v1" });
 
-        // Enable JWT Authentication in Swagger
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             Name = "Authorization",
@@ -99,14 +93,14 @@ void EnableSwagger(WebApplicationBuilder builder)
         });
 
         options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
         {
-            new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            new string[] {}
-        }
-    });
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                },
+                new string[] {}
+            }
+        });
     });
 }
